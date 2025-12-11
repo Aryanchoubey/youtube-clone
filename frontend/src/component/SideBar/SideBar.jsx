@@ -41,7 +41,7 @@ export default function Sidebar({ isSidebarOpen, setIsSidebarOpen }) {
     setUserData(res.data.data);
     console.log("user data:", res.data.data);
   } else {
-    console.log("Unexpected response:", res);
+    // console.log("Unexpected response:", res);
         
   }
     } catch (error) {
