@@ -15,7 +15,7 @@ export default function LikedVideos({ isSidebarOpen }) {
     const token = localStorage.getItem("token");
     if(!token)return null;
     try {
-      const res = await axios.get(`http://localhost:5000/api/v1/likes/${userId}`,{
+      const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/v1/likes/${userId}`,{
         headers:{Authorization: `Bearer ${token}`}
       })
       console.log(res.data.data);

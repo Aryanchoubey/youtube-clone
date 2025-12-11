@@ -36,7 +36,7 @@ export default function Channel() {
     const getChannelUser = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:5000/api/v1/users/c/${userId}`,
+          `${import.meta.env.VITE_BACKEND_URL}/api/v1/users/c/${userId}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
@@ -66,7 +66,7 @@ export default function Channel() {
     const getUserVideos = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:5000/api/v1/videos/${userId}?page=1&limit=10`,
+          `${import.meta.env.VITE_BACKEND_URL}/api/v1/videos/${userId}?page=1&limit=10`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
@@ -93,7 +93,7 @@ export default function Channel() {
       if (!token) return;
 
       const res = await axios.post(
-        `http://localhost:5000/api/v1/subscriptions/c/${userData._id}`,
+        `${import.meta.env.VITE_BACKEND_URL}/api/v1/subscriptions/c/${userData._id}`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -113,7 +113,7 @@ export default function Channel() {
     console.log(videoId);
 
     await axios.delete(
-      `http://localhost:5000/api/v1/videos/${videoId}`,
+      `${import.meta.env.VITE_BACKEND_URL}/api/v1/videos/${videoId}`,
       {
         headers: { Authorization: `Bearer ${token}` }
       }

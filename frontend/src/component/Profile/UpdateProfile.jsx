@@ -35,7 +35,7 @@ export default function UpdateProfile() {
       const token = localStorage.getItem("token");
 
       const res = await axios.patch(
-        "http://localhost:5000/api/v1/users/update-account",
+        `${import.meta.env.VITE_BACKEND_URL}/api/v1/users/update-account`,
         form,
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -59,7 +59,7 @@ export default function UpdateProfile() {
         const token = localStorage.getItem("token");
 
         const res = await axios.get(
-          `http://localhost:5000/api/v1/users/current-user`,
+          `${import.meta.env.VITE_BACKEND_URL}/api/v1/users/current-user`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }

@@ -23,7 +23,7 @@ function ProfilePage() {
       }
 
       const res = await axios.get(
-        `http://localhost:5000/api/v1/users/c/${userId}`,
+        `${import.meta.env.VITE_BACKEND_URL}/api/v1/users/c/${userId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -51,7 +51,7 @@ const fetchProfile = async()=>{
   if(!token) return null;
   try {
      const res = await axios.get(
-          `http://localhost:5000/api/v1/users/c/${userId}`,
+          `${import.meta.env.VITE_BACKEND_URL}/api/v1/users/c/${userId}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
   } catch (error) {

@@ -50,7 +50,7 @@ function Register() {
 
     try {
       const res = await axios.post(
-        "http://localhost:5000/api/v1/users/register",
+        `${import.meta.env.VITE_BACKEND_URL}/api/v1/users/register`,
         fd,
         {
           headers: { "Content-Type": "multipart/form-data" },

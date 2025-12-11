@@ -15,7 +15,7 @@ export default function ChannelStats() {
         const token = localStorage.getItem("token");
         if (!token) return;
 
-        const res = await axios.get("http://localhost:5000/api/v1/dashboard/stats", {
+        const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/v1/dashboard/stats`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 

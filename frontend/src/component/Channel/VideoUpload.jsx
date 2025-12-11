@@ -20,7 +20,7 @@ export default function VideoUpload() {
    try {
     const token = localStorage.getItem("token");
     if(!token) return null;
-    const res = await axios.get("http://localhost:5000/api/v1/users/current-user", {
+    const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/v1/users/current-user`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     setUserData(res.data.data)
@@ -70,7 +70,7 @@ export default function VideoUpload() {
       data.append("thumbnail", thumbnail);
 
       const res = await axios.post(
-        "http://localhost:5000/api/v1/videos",
+        `${import.meta.env.VITE_BACKEND_URL}/api/v1/videos`,
         data,
         {
           headers: {

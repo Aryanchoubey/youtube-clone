@@ -30,7 +30,7 @@ export default function WatchVideos() {
     try {
       const token = localStorage.getItem("token");
       const res = await axios.get(
-        `http://localhost:5000/api/v1/likes/status/v/${id}`,
+        `${import.meta.env.VITE_BACKEND_URL}/api/v1/likes/status/v/${id}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setLiked(res.data.data.liked);
@@ -44,7 +44,7 @@ export default function WatchVideos() {
     try {
       const token = localStorage.getItem("token");
       const res = await axios.get(
-        `http://localhost:5000/api/v1/likes/count/v/${id}`,
+        `${import.meta.env.VITE_BACKEND_URL}/api/v1/likes/count/v/${id}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setLikeCount(res.data.data.count);
@@ -58,7 +58,7 @@ export default function WatchVideos() {
     try {
       const token = localStorage.getItem("token");
       const res = await axios.post(
-        `http://localhost:5000/api/v1/likes/toggle/v/${id}`,
+        `${import.meta.env.VITE_BACKEND_URL}/api/v1/likes/toggle/v/${id}`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -82,7 +82,7 @@ export default function WatchVideos() {
       if (!token) return;
 
       const res = await axios.post(
-        `http://localhost:5000/api/v1/comments/${id}`,
+        `${import.meta.env.VITE_BACKEND_URL}/api/v1/comments/${id}`,
         form,
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -102,7 +102,7 @@ export default function WatchVideos() {
     try {
       const token = localStorage.getItem("token");
       const res = await axios.get(
-        `http://localhost:5000/api/v1/comments/${id}`,
+        `${import.meta.env.VITE_BACKEND_URL}/api/v1/comments/${id}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -126,7 +126,7 @@ export default function WatchVideos() {
       if (!token) return;
 
       const res = await axios.delete(
-        `http://localhost:5000/api/v1/comments/c/${commentId}`,
+        `${import.meta.env.VITE_BACKEND_URL}/api/v1/comments/c/${commentId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
