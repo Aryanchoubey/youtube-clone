@@ -16,12 +16,12 @@ export default function Channel() {
 
   const [userData, setUserData] = useState(null);
   const [showDelete, setShowDelete] = useState(null);
- // channel owner data
+ 
   const [videos, setVideos] = useState([]);       
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [subscriberCount, setSubscriberCount] = useState(0);
   
-  console.log();
+
   
 
  
