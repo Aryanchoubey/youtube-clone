@@ -80,7 +80,8 @@ const publishAVideo = asyncHandler(async (req, res) => {
     title,
     description,
     owner: user,
-    ownerName: username,
+    ownerName: req.user.username,
+
     videoFile: videoUrl,      // <-- This is now ONLY a string
     thumbnail: thumbnailUrl,  // <-- Also only URL
   });

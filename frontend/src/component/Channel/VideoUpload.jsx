@@ -74,8 +74,9 @@ export default function VideoUpload() {
         data,
         {
           headers: {
+             Authorization: `Bearer ${token}`,
             "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${token}`, // <-- send token
+            // <-- send token
           },
         }
       );
