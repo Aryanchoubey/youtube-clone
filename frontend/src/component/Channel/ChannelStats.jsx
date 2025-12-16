@@ -105,7 +105,13 @@ export default function ChannelStats() {
           <CardContent className="p-4 flex flex-col items-center">
             <Calendar className="w-6 h-6 mb-2" />
             <h2 className="font-semibold text-lg">
-              {}
+              {channel.createdAt
+        ? new Date(channel.createdAt).toLocaleDateString("en-IN", {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+          })
+        : "—"}
             </h2>
             <p className="text-gray-600 text-sm">Joined</p>
           </CardContent>

@@ -121,21 +121,21 @@ const fetchProfile = async()=>{
       </div>
 
       {/* Optional: Edit Profile Button */}
-      <div className="flex flex-row gap-5 ">
+      <div className="flex lg:flex-row flex-col lg:gap-5 gap-1 ">
         <button
         onClick={updateProfile}
-        className="mt-6 px-6 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition">
+        className="lg:mt-6 mt-2 px-6 py-2 bg-blue-600 text-white lg:text-xl text-sm rounded-full hover:bg-blue-700 transition">
         Edit Profile
       </button>
         <button
         onClick={changePassword}
-        className="mt-6 px-6 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition">
+        className="lg:mt-6 mt-2 px-6 py-2 bg-blue-600 text-white lg:text-xl text-sm rounded-full hover:bg-blue-700 transition">
        Change Password
       </button>
       
       <button 
       onClick={handleLogout}
-      className="mt-6 px-6 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition">
+      className="lg:mt-6 mt-2 px-6 py-2 bg-blue-600 text-white lg:text-xl text-sm rounded-full hover:bg-blue-700 transition">
         Logout
       </button>
       </div>

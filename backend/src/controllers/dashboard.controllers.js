@@ -8,101 +8,83 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { User } from "../models/user.models.js";
 
 const getChannelStats = asyncHandler(async (req, res) => {
-  // TODO: Get the channel stats like total video views, total subscribers, total videos, total likes etc.
-  const userId = req.user._id
+  const userId = req.user?._id;
+
   if (!userId) {
-    throw new ApiError(400 ,"user id is missing")
+    throw new ApiError(400, "user id is missing");
   }
-  const user = await User.findById(userId)
-    console.log( user);
-   const allStatusOfChannel= await User.aggregate([
+
+  const stats = await User.aggregate([
     {
-        $match:{
-            _id:userId
-        },
+      $match: {
+        _id: new mongoose.Types.ObjectId(userId),
+      },
+    },
+    {
+      $lookup: {
+        from: "videos",
+        localField: "_id",
+        foreignField: "owner",
+        as: "videos",
+      },
+    },
+    {
+      $lookup: {
+        from: "subscriptions",
+        localField: "_id",
+        foreignField: "channel",
+        as: "subscribers",
+      },
+    },
+    {
+      $lookup: {
+        from: "likes",
+        localField: "_id",
+        foreignField: "likedBy",
+        as: "likes",
+      },
+    },
+    {
+      $addFields: {
+        totalVideos: { $size: { $ifNull: ["$videos", []] } },
+
         
-    },{
-        $lookup:{
-            from:"videos",
-            localField:"_id",
-            foreignField:"owner",
-            as:"views"
+        totalViews: {
+          $sum: {
+            $map: {
+              input: "$videos",
+              as: "video",
+              in: { $ifNull: ["$$video.views", 0] },
+            },
+          },
         },
-       
+
+        totalSubscribers: { $size: { $ifNull: ["$subscribers", []] } },
+        totalLikes: { $size: { $ifNull: ["$likes", []] } },
+      },
     },
     {
-        $lookup:{
-            from:"videos",
-            localField:"_id",
-            foreignField:"owner",
-            as:"allVideos"
-        },
-       
-    },
-    {
-        $lookup:{
-            from:"subscriptions",
-            localField:"_id",
-            foreignField:"channel",
-            as:"subscribers"
-        }
-    },
-    {
-        $lookup:{
-            from:"likes",
-            localField:"_id",
-            foreignField:"likedBy",
-            as:"likes"
-        }
-    },
-    {
-        $addFields:{
-            totalViews:{$size :"$views"}
-        },
-        
-    },
-    {
-        $addFields:{
-            totalSubscribers:{$size:{$ifNull:["$subscribers",[]]}}
-        }
-    },
-    {
-        $addFields:{
-            totalLikes:{$size:{ $ifNull:["$likes",[]]}}
-        }
-    },
-    {
-        $addFields:{
-            totalVideos:{$size:{ $ifNull:["$allVideos",[]]}}
-        }
-    },
-    {
-        $project:{
+      $project: {
         fullname: 1,
         username: 1,
         avatar: 1,
         coverImage: 1,
+        createdAt: 1,     
         totalVideos: 1,
-        totalLikes:1,
-        totalSubscribers:1,
-        totalViews:1,
+        totalViews: 1,
+        totalSubscribers: 1,
+        totalLikes: 1,
+      },
+    },
+  ]);
 
-       
-
-
-        }
-    }
-   ],)
-//    console.log( allStatusOfChannel.totalViews);
-   
-    if (!allStatusOfChannel.length) {
+  if (!stats.length) {
     throw new ApiError(404, "no stats found");
   }
 
-   return res
-   .status(200)
-   .json(new ApiResponse(200,allStatusOfChannel[0],"all status of channel"))
-
+  return res
+    .status(200)
+    .json(new ApiResponse(200, stats[0], "all status of channel"));
 });
 
 const getChannelVideos = asyncHandler(async (req, res) => {

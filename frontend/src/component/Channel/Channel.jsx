@@ -98,10 +98,12 @@ console.log(userData);
       <div className="w-full max-w-5xl bg-white rounded-2xl shadow-md overflow-hidden">
         <div className="h-48 bg-gray-300"></div>
 
-        <CardContent className="p-6 flex items-center gap-4">
+        <CardContent className="lg:p-5 p-2 flex lg:flex-row flex-col items-center justify-between h-44 gap-4">
           {userData && (
             <>
-              <img
+              <div className="flex lg:max-w-xl  w-full items-center">
+                <div className="flex  items-center">
+                <img
                 onClick={() => navigate(`/channel/${userData._id}/stats`)}
 
                 src={userData.avatar}
@@ -109,16 +111,20 @@ console.log(userData);
                 className="w-24 h-24 rounded-full cursor-pointer border-4 border-white object-cover"
               />
 
+               
+              </div>
+
               <div className="flex flex-col gap-1">
                 <h1 className="text-2xl font-bold">{userData.username}</h1>
                 <p className="text-gray-500 text-sm">
                   {subscriberCount} Subscribers
                 </p>
               </div>
+              </div>
 
-              <div className="ml-auto">
+              <div className="ml-2 lg:max-w-xl flex justify-end items-end w-full">
                 <Button
-                  className={`${isSubscribed ? "bg-gray-400" : "bg-red-700"}`}
+                  className={`${isSubscribed ? "bg-gray-400" : "bg-red-700"} lg:w-28  w-full `}
                   onClick={toggleSubscribe}
                 >
                   {isSubscribed ? "Subscribed" : "Subscribe"}

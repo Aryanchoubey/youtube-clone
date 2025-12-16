@@ -69,7 +69,7 @@ const handleSubmit = async (e) => {
 
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-muted px-4">
+    <div className="min-h-screen flex items-start justify-center bg-muted px-4">
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader>
           <CardTitle className="text-xl">Change Password</CardTitle>
@@ -107,7 +107,7 @@ const handleSubmit = async (e) => {
               <Input
                 name="confirmPassword"
                 type="password"
-                placeholder="Enter new password"
+                placeholder="Enter confirm password"
                 value={form.confirmPassword}
                 onChange={handleChange}
                 required

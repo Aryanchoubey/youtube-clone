@@ -40,7 +40,7 @@ function Search() {
   }
 
   return (
-    <div className="pt-20 px-6">
+    <div className="lg:pt-20 px-6">
       <h2 className="text-xl font-semibold mb-4">
         Search results for "<span className="text-blue-600">{query}</span>"
       </h2>
@@ -48,7 +48,7 @@ function Search() {
       {videos.length === 0 ? (
         <p>No videos found</p>
       ) : (
-        <div className="space-y-4 grid grid-cols-3 space-x-3">
+        <div className="space-y-4 grid Lg:grid-cols-3 grid-cols-1 space-x-3">
           {videos.map((video) => (
             <div
               key={video._id}

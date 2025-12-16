@@ -44,13 +44,13 @@ function Header({ isSidebarOpen, setIsSidebarOpen }) {
   };
 
   return (
-    <header className="w-full bg-white shadow-sm p-4 pb-3 flex items-center justify-between gap-4 fixed top-0 left-0 z-50">
+    <header className="w-full bg-white shadow-sm p-4 pb-3 flex items-center justify-between lg:gap-4 gap-4 fixed top-0 left-0 z-50">
       {/* Left */}
       {/* SHOW ONLY IF USER IS LOGGED IN */}
       {isLoggedIn && (
         <>
           {/* LEFT SIDE - Logo + Sidebar Button */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center lg:gap-3 md:gap-3 gap-">
             {!isSidebarOpen && (
               <Button
                 variant="ghost"
@@ -60,16 +60,16 @@ function Header({ isSidebarOpen, setIsSidebarOpen }) {
                 <Menu />
               </Button>
             )}
-            <h1 className="text-xl font-bold">MyTube</h1>
+            <h1 className=" lg:text-xl md:text-xl text-sm font-bold">MyTube</h1>
           </div>
 
           {/* MIDDLE - Search Bar */}
-          <div className="flex items-center gap-2 max-w-xl w-full mx-4">
-            <div className="flex items-center gap-2 max-w-xl w-full mx-4">
-              <div className="flex items-center gap-2 max-w-xl w-full mx-4">
+          <div className="flex items-center gap-2 max-w-xl w-full lg:mx-4 md:mx-4 mx-1 ">
+            <div className="flex items-center gap-2 lg:max-w-xl md:max-w-3xl w-full lg:mx-4 md:mx-4 mx-1">
+              <div className="flex items-center lg:gap-2 md:gap-2 gap-1 md:w-full max-w-xl lg:w-full md:mx-4 lg:mx-4 mx-1">
                 <Input
                   placeholder="Search"
-                  className="rounded-xl"
+                  className="rounded-xl "
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyDown={(e) => {
