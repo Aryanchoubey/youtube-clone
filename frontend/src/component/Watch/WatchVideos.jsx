@@ -1,34 +1,81 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import axios from "axios";
-import { EllipsisVertical, ThumbsUp } from "lucide-react";
+"use client";
+
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useParams, useLocation, useNavigate } from "react-router-dom";
+import axios from "axios";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { ThumbsUp, EllipsisVertical } from "lucide-react";
+import VideoPlayer from "./VideoPlayer";
 
 export default function WatchVideos() {
   const { id } = useParams();
-  const { state: video } = useLocation();
+  const { state } = useLocation();
   const navigate = useNavigate();
+
+  const [video, setVideo] = useState(state || null);
+  const [views, setViews] = useState(0);
 
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [comments, setComments] = useState([]);
+  const [menuOpenId, setMenuOpenId] = useState(null);
+  const [editCommentId, setEditCommentId] = useState(null);
+  const [editContent, setEditContent] = useState("");
+
+  const [content, setContent] = useState("");
+
   const [deletecmt, setDeletecmt] = useState(null);
-  const [form, setForm] = useState({ content: "" });
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const token = localStorage.getItem("token");
+
+  /* ---------------- GET HLS URL ---------------- */
+  const getHlsUrl = (mp4Url) => {
+    if (!mp4Url) return "";
+    const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+    const cleanPublicId = mp4Url
+      .replace(/^https:\/\/res.cloudinary.com\/[^/]+\/video\/upload\//, "")
+      .replace(".mp4", "");
+    return `https://res.cloudinary.com/${cloudName}/video/upload/sp_hd/${cleanPublicId}.m3u8`;
   };
 
-  const handleNavigation = () => {
-    navigate(`/channel/${video?.owner._id}`);
-  };
+  /* ---------------- FETCH VIDEO ---------------- */
+  useEffect(() => {
+    if (!video) {
+      const fetchVideo = async () => {
+        try {
+          const res = await axios.get(
+            `${import.meta.env.VITE_BACKEND_URL}/api/v1/videos/${id}`
+          );
+          console.log("video :", res.data.data);
+          setVideo(res.data.data.video);
+        } catch (err) {
+          console.error("Error fetching video:", err);
+        }
+      };
+      fetchVideo();
+    }
+  }, [id, video]);
 
-  /* LIKE STATUS */
-  const fetchLikeStatus = async () => {
+  /* ---------------- VIEWS ---------------- */
+  const totalViews = async () => {
+    if (!token || !id) return;
     try {
-      const token = localStorage.getItem("token");
+      const res = await axios.put(
+        `${import.meta.env.VITE_BACKEND_URL}/api/v1/videos/${id}/views`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setViews(res.data.data.video.views);
+    } catch (err) {
+      console.log("Views error:", err);
+    }
+  };
+
+  /* ---------------- LIKE ---------------- */
+  const fetchLikeStatus = async () => {
+    if (!token || !id) return;
+    try {
       const res = await axios.get(
         `${import.meta.env.VITE_BACKEND_URL}/api/v1/likes/status/v/${id}`,
         { headers: { Authorization: `Bearer ${token}` } }
@@ -39,10 +86,9 @@ export default function WatchVideos() {
     }
   };
 
-  /* LIKE COUNT */
   const fetchLikeCount = async () => {
+    if (!token || !id) return;
     try {
-      const token = localStorage.getItem("token");
       const res = await axios.get(
         `${import.meta.env.VITE_BACKEND_URL}/api/v1/likes/count/v/${id}`,
         { headers: { Authorization: `Bearer ${token}` } }
@@ -53,10 +99,9 @@ export default function WatchVideos() {
     }
   };
 
-  /* LIKE TOGGLE */
   const toggleLike = async () => {
+    if (!token || !id) return;
     try {
-      const token = localStorage.getItem("token");
       const res = await axios.post(
         `${import.meta.env.VITE_BACKEND_URL}/api/v1/likes/toggle/v/${id}`,
         {},
@@ -75,186 +120,210 @@ export default function WatchVideos() {
     }
   };
 
-  /* ADD COMMENT */
-  const addComment = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) return;
-
-      const res = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/api/v1/comments/${id}`,
-        form,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      console.log("add comment :", res.data.data);
-
-      setForm({ content: "" });
-      loadComments(); // refresh comments after adding
-
-    } catch (error) {
-      console.log("add comments error:", error);
-    }
-  };
-
-  /* LOAD COMMENTS */
+  /* ---------------- COMMENTS ---------------- */
   const loadComments = async () => {
+    if (!token || !id) return;
     try {
-      const token = localStorage.getItem("token");
       const res = await axios.get(
         `${import.meta.env.VITE_BACKEND_URL}/api/v1/comments/${id}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
       setComments(res.data?.data[0]?.comments || []);
-    } catch (error) {
-      console.log("COMMENTS ERROR:", error);
+      console.log("load comment :", res.data.data[0]);
+    } catch (err) {
+      console.log("Load comments error:", err);
     }
   };
 
-  /* INITIAL LOAD */
-  useEffect(() => {
-    fetchLikeStatus();
-    fetchLikeCount();
-    loadComments();
-  }, [id]);
-
-  /* DELETE COMMENT */
-  const deleteComment = async (commentId) => {
+  const addComment = async () => {
+    if (!token || !id || !content.trim()) return;
     try {
-      const token = localStorage.getItem("token");
-      if (!token) return;
+      await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/api/v1/comments/${id}`,
+        { content },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setContent("");
+      loadComments();
+    } catch (err) {
+      console.log("Add comment error:", err);
+    }
+  };
+  const handleEditSubmit = async (commentId) => {
+    if (!token || !editContent.trim()) return;
 
-      const res = await axios.delete(
+    try {
+      await axios.patch(
         `${import.meta.env.VITE_BACKEND_URL}/api/v1/comments/c/${commentId}`,
+        { content: editContent },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      console.log("Delete comment response:", res.data);
-
-      setDeletecmt(null);
-
-      setComments((prev) =>
-        prev.filter((item) => item._id !== commentId)
-      );
-
-    } catch (error) {
-      console.log("Delete comment error:", error);
+      setEditCommentId(null);
+      setEditContent("");
+      loadComments();
+    } catch (err) {
+      console.log("Edit error:", err);
     }
   };
 
+  const deleteComment = async (commentId) => {
+    if (!token || !id) return;
+    try {
+      await axios.delete(
+        `${import.meta.env.VITE_BACKEND_URL}/api/v1/comments/c/${commentId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setComments((prev) => prev.filter((c) => c._id !== commentId));
+      setDeletecmt(null);
+    } catch (err) {
+      console.log("Delete comment error:", err);
+    }
+  };
+  const loggedUserId = localStorage.getItem("userId");
+
+  console.log(loggedUserId);
+
+  /* ---------------- INITIAL LOAD ---------------- */
+  useEffect(() => {
+    if (video) {
+      fetchLikeStatus();
+      fetchLikeCount();
+      loadComments();
+      totalViews();
+    }
+  }, [video]);
+
+  if (!video) return <div>Loading video...</div>;
+
   return (
-    <div className="min-h-screen bg-gray-100 p-4 md:p-8 font-bold">
-      <Card className="max-w-4xl w-full mx-auto shadow-lg rounded-2xl overflow-hidden">
-        
-        {/* Video */}
-        <div className="w-full h-[230px] sm:h-[300px] md:h-[450px] bg-black">
-          <video
-            className="w-full h-full object-cover"
-            controls
-            preload="metadata"
-            autoPlay
+    <div className="min-h-screen bg-gray-100 p-4">
+      {/* VIDEO */}
+      <div className="max-w-4xl mx-auto bg-black rounded-xl overflow-hidden">
+        <VideoPlayer src={getHlsUrl(video.videoFile)} />
+      </div>
+
+      {/* INFO */}
+      <div className="max-w-4xl mx-auto mt-4 bg-white p-4 rounded-xl">
+        <h1 className="text-xl font-bold">{video.title}</h1>
+        <p className="text-gray-600 text-sm mt-1">{video.description}</p>
+
+        <div className="flex items-center gap-6 mt-4">
+          {/* Avatar */}
+          <div
+            onClick={() => navigate(`/channel/${video.owner._id}`)}
+            className="flex items-center gap-3 cursor-pointer"
           >
-            <source src={video?.videoFile} type="video/mp4" />
-          </video>
-        </div>
-
-        {/* Title + Description */}
-        <div className="w-full p-5 flex flex-col gap-4">
-          <h1 className="text-xl sm:text-2xl text-gray-800">{video?.title}</h1>
-
-          <p className="text-gray-700 text-sm sm:text-base leading-relaxed">
-            {video?.description || "No description available."}
-          </p>
-
-          {/* Username + Like Button */}
-          <div className="flex items-center gap-4 justify-start">
-            
-            {/* Avatar */}
-            <div
-              onClick={handleNavigation}
-              className="cursor-pointer px-2 py-2 bg-gray-200 rounded-full 
-                       hover:bg-gray-300 active:scale-95 transition-all text-sm 
-                       shadow-sm"
-            >
-              <img
-                src={video.owner.avatar}
-                alt=""
-                className="w-8 h-8 rounded-full object-cover"
-              />
-            </div>
-
-            {/* Like Button */}
-            <div
-              onClick={toggleLike}
-              className={`cursor-pointer flex items-center gap-2 px-4 py-2 rounded-full shadow-sm 
-                active:scale-95 transition-all
-                ${
-                  liked
-                    ? "bg-blue-100 text-blue-700"
-                    : "bg-gray-200 text-gray-700"
-                }
-              `}
-            >
-              <ThumbsUp
-                className="w-6 h-6"
-                color={liked ? "#1e3a8a" : "#4b5563"}
-                fill={liked ? "#1e3a8a" : "none"}
-              />
-              <span className="text-sm">{likeCount} Likes</span>
-            </div>
+            <img
+              src={video.owner.avatar}
+              className="w-10 h-10 rounded-full object-cover"
+            />
           </div>
-        </div>
-      </Card>
 
-      {/* Comments */}
-      <div className="max-w-4xl mx-auto mt-6 p-4 bg-white rounded-xl shadow">
-        <h1 className="text-lg mb-3">Comments</h1>
+          {/* Like */}
+          <div
+            onClick={toggleLike}
+            className={`flex items-center gap-2 px-4 py-2 rounded-full cursor-pointer
+              ${liked ? "bg-blue-100 text-blue-700" : "bg-gray-200"}
+            `}
+          >
+            <ThumbsUp fill={liked ? "#1d4ed8" : "none"} />
+            <span>{likeCount}</span>
+          </div>
+
+          {/* Views */}
+          <span className="text-sm text-gray-500">{views} views</span>
+        </div>
+      </div>
+
+      {/* COMMENTS */}
+      <div className="max-w-4xl mx-auto mt-6 bg-white p-4 rounded-xl">
+        <h2 className="font-semibold mb-2">Comments</h2>
 
         <Input
-          name="content"
           placeholder="Add a comment..."
-          value={form.content}
-          onChange={handleChange}
-          className="mb-3"
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") addComment();
+          }}
         />
 
-        <Button onClick={addComment} className="bg-amber-600">Add</Button>
+        <Button onClick={addComment} className="mt-2 cursor-pointer ">
+          Comment
+        </Button>
 
-        <Card className="w-full mt-4 p-4 rounded-xl shadow-sm">
-          <CardTitle className="pb-3 text-gray-800">All Comments</CardTitle>
-
-          {comments.length > 0 ? (
-            comments.map((c) => (
-              <div key={c._id} className="p-3 border-b last:border-none">
-                <p className="text-gray-800">{c.content}</p>
-                <p className="text-xs text-gray-500 mt-1">
-                  {new Date(c.createdAt).toLocaleString()}
-                </p>
-
-                <div className="flex justify-end">
-                  <EllipsisVertical
-                    onClick={() =>
-                      setDeletecmt(deletecmt === c._id ? null : c._id)
-                    }
-                    className="cursor-pointer"
+        <div className="mt-4 space-y-3">
+          {comments.map((c) => (
+            <div key={c._id} className="border-b pb-3 relative">
+              {/* CONTENT / EDIT */}
+              {editCommentId === c._id ? (
+                <>
+                  <Input
+                    value={editContent}
+                    onChange={(e) => setEditContent(e.target.value)}
+                    className="mb-2"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") handleEditSubmit();
+                    }}
                   />
-
-                  {deletecmt === c._id && (
-                    <button
-                      onClick={() => deleteComment(c._id)}
-                      className="text-red-600 hover:bg-red-100 px-2 py-1 rounded-md ml-2"
+                  <div className="flex gap-2">
+                    <Button size="sm" onClick={() => handleEditSubmit(c._id)}>
+                      Save
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setEditCommentId(null)}
                     >
-                      Delete
-                    </button>
-                  )}
+                      Cancel
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <p>{c.content}</p>
+                  <p className="text-xs text-gray-500">
+                    {new Date(c.createdAt).toLocaleString()}
+                  </p>
+                </>
+              )}
+
+              {/* ELLIPSIS (ONLY OWNER) */}
+              {c.owner?.toString() === loggedUserId && (
+                <EllipsisVertical
+                  className="absolute right-0 top-0 cursor-pointer"
+                  onClick={() =>
+                    setMenuOpenId(menuOpenId === c._id ? null : c._id)
+                  }
+                />
+              )}
+
+              {/* DROPDOWN */}
+              {menuOpenId === c._id && (
+                <div className="absolute right-0 top-6 bg-white border shadow-md rounded-md z-10">
+                  <button
+                    className="block px-4 py-2 hover:bg-gray-100 w-full text-left"
+                    onClick={() => {
+                      setEditCommentId(c._id);
+                      setEditContent(c.content);
+                      setMenuOpenId(null);
+                    }}
+                  >
+                    Edit
+                  </button>
+
+                  <button
+                    className="block px-4 py-2 hover:bg-red-100 text-red-600 w-full text-left"
+                    onClick={() => deleteComment(c._id)}
+                  >
+                    Delete
+                  </button>
                 </div>
-              </div>
-            ))
-          ) : (
-            <p className="text-gray-500">No comments yet.</p>
-          )}
-        </Card>
+              )}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

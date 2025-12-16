@@ -1,7 +1,7 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.models.js";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { uploadOnCloudinaryVideo, uploadOnCloudinaryImage } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
@@ -48,14 +48,14 @@ const registerUser = asyncHandler(async (req, res) => {
   let coverImage = "";
 
   if (avatarLocalPath) {
-    const upload = await uploadOnCloudinary(avatarLocalPath);
+    const upload = await uploadOnCloudinaryImage(avatarLocalPath);
     avatar = upload?.url || "";
   }
   
   
 
   if (coverImagePath) {
-    const upload = await uploadOnCloudinary(coverImagePath);
+    const upload = await uploadOnCloudinaryImage(coverImagePath);
     coverImage = upload?.url || "";
   }
 
@@ -136,6 +136,7 @@ const loginUser = asyncHandler(async (req, res) => {
           username:user.username,
           accessToken,
           refreshToken,
+          _id:user._id
         },
         "User logged In Successfully"
       )
@@ -212,13 +213,16 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
   }
 });
 const changeCurrentPassword = asyncHandler(async (req, res) => {
-  const { oldPassword, newPassword } = req.body;
+  const { oldPassword, newPassword,confirmPassword } = req.body;
   const user = await User.findById(req.user?._id);
 
   const isPasswordCorrect = await user.isPasswordCorrect(oldPassword);
 
   if (!isPasswordCorrect) {
     throw new ApiError(400, "invalid password");
+  }
+  if (newPassword !== confirmPassword) {
+    throw new ApiError(400, "password does not match");
   }
   user.password = newPassword;
   await user.save({ validateBeforeSave: false });

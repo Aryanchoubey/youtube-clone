@@ -66,6 +66,8 @@ export default function UpdateProfile() {
         );
 
         const data = res.data?.data;
+        console.log(data);
+        
 
         setForm({
           fullname: data?.fullname || "",
@@ -78,6 +80,7 @@ export default function UpdateProfile() {
 
     fetchProfile();
   }, []);
+  
 
   return (
     <div className="w-full flex justify-center mt-10 px-4">

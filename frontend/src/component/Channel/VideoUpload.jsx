@@ -100,7 +100,7 @@ export default function VideoUpload() {
       <Card className="w-full max-w-xl p-5 rounded-2xl shadow-lg">
         <CardContent className="space-y-4">
          <div className="flex gap-10">
-          <Button onClick={() => handleNavigation(`channel/stats/${userData?._id}`)}>
+          <Button onClick={() => handleNavigation(`channel/${userData?._id}/stats`)}>
 
             <ArrowLeft />
             Back</Button>

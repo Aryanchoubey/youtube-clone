@@ -29,16 +29,17 @@ function Login() {
         password: form.password,
       });
 
-      console.log(res.data);
+      console.log(res.data.data._id);
 
       if (res.data.success) {  // check success instead of token
   localStorage.setItem("token", res.data.data.accessToken); // correct key
   localStorage.setItem("username", res.data.data.username);
   localStorage.setItem("refresh", res.data.data.refreshToken);
+  localStorage.setItem("userId", res.data.data._id);
 }
 
       
-      console.log(res.data.data.username);
+      console.log(res.data.data._id);
       
 
       navigate("/");

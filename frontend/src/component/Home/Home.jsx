@@ -8,7 +8,7 @@ function Home({ isSidebarOpen }) {
 const navigate = useNavigate()
   const getAllVideos = async () => {
     const token = localStorage.getItem("token");
-    if (!token) return;
+    if (!token) navigate("/login");
 
     try {
       const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/v1/videos/all`, {
@@ -19,8 +19,8 @@ const navigate = useNavigate()
       // console.log("all videos:",res.data.data)
 
 
-      setVideos(res.data.data.videos || []);
-      console.log("all videos:",res.data.data.videos[0].owner.username)
+      setVideos(res.data.data || []);
+      console.log("all videos:",res.data.data)
     } catch (error) {
       console.log("Error getting videos:", error);
     }
@@ -79,8 +79,9 @@ const navigate = useNavigate()
 
       <div className="mt-3 flex justify-between text-xs text-gray-400">
         <span>{new Date(video.createdAt).toLocaleDateString()}</span>
-        <span>{video.views || 0} views</span>
+        
       </div>
+      <span>{video.views || 0} views</span>
     </CardContent>
   </Card>
 ))}

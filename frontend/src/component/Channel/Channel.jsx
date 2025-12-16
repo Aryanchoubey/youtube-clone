@@ -1,10 +1,9 @@
-"use client";
+
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import axios from "axios";
 import { EllipsisVertical } from "lucide-react";
-
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -15,23 +14,16 @@ export default function Channel() {
   
 
   const [userData, setUserData] = useState(null);
-  const [showDelete, setShowDelete] = useState(null);
- 
-  const [videos, setVideos] = useState([]);       
+  const [videos, setVideos] = useState([]);
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [subscriberCount, setSubscriberCount] = useState(0);
-  
+  const [showDelete, setShowDelete] = useState(null);
 
-  
+  const token = localStorage.getItem("token");
 
- 
-  // Fetch channel owner profile
-
+  // Fetch channel profile
   useEffect(() => {
-    if (!userId) return;
-
-    const token = localStorage.getItem("token");
-    if (!token) return;
+    if (!userId || !token) return;
 
     const getChannelUser = async () => {
       try {
@@ -40,102 +32,66 @@ export default function Channel() {
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
-        const data = res.data.data;
-        console.log(res.data.data);
-        
-        setUserData(data);
-        setIsSubscribed(data.isSubscribed || false);
-        setSubscriberCount(data.subscriberCount || 0);
+        setUserData(res.data.data);
+        setIsSubscribed(res.data.data.isSubscribed || false);
+        setSubscriberCount(res.data.data.subscriberCount || 0);
       } catch (err) {
         console.error("Error loading channel user:", err);
       }
     };
-
     getChannelUser();
   }, [userId]);
 
-  
-  // Fetch channel owner videos
-
+  // Fetch channel videos
   useEffect(() => {
-    if (!userId) return;
-
-    const token = localStorage.getItem("token");
-    if (!token) return;
+    if (!userId || !token) return null;
 
     const getUserVideos = async () => {
       try {
         const res = await axios.get(
-          `${import.meta.env.VITE_BACKEND_URL}/api/v1/videos/${userId}?page=1&limit=10`,
-          { headers: { Authorization: `Bearer ${token}` } }
+          `${import.meta.env.VITE_BACKEND_URL}/api/v1/videos/`,
+          { 
+            headers: { Authorization: `Bearer ${token}` },
+            params: {userId, page: 1, limit: 10 } 
+          }
         );
-
-       
-         setVideos(res.data.data.videos || []);
-        console.log("Channel videos:", res.data.data.videos);
-
+        setVideos(res.data.data.videos || []);
       } catch (err) {
         console.error("Error loading user videos:", err);
       }
     };
-
     getUserVideos();
-  }, []);
+  }, [userId]);
 
-
-  // Subscribe / Unsubscribe
-  
   const toggleSubscribe = async () => {
-    if (!userData?._id) return;
-
+    if (!userData?._id || !token) return;
     try {
-      const token = localStorage.getItem("token");
-      if (!token) return;
-
-      const res = await axios.post(
+      await axios.post(
         `${import.meta.env.VITE_BACKEND_URL}/api/v1/subscriptions/c/${userData._id}`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
-      // Toggle subscription locally
       setIsSubscribed(!isSubscribed);
-      setSubscriberCount((prev) => (isSubscribed ? prev - 1 : prev + 1));
+      setSubscriberCount(prev => (isSubscribed ? prev - 1 : prev + 1));
     } catch (err) {
-      console.error("Error in subscription:", err);
+      console.error("Subscription error:", err);
     }
   };
+
   const handleDelete = async (videoId) => {
-    
-  try {
-    const token = localStorage.getItem("token");
     if (!token) return;
-    console.log(videoId);
+    try {
+      await axios.delete(
+        `${import.meta.env.VITE_BACKEND_URL}/api/v1/videos/${videoId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setVideos(prev => prev.filter(v => v._id !== videoId));
+    } catch (err) {
+      console.error("Delete error:", err);
+    }
+  };
+console.log(userData);
 
-    await axios.delete(
-      `${import.meta.env.VITE_BACKEND_URL}/api/v1/videos/${videoId}`,
-      {
-        headers: { Authorization: `Bearer ${token}` }
-      }
-    );
-
-    alert("Video deleted successfully");
-    setVideos((prev) => prev.filter((v) => v._id !== videoId));
-    // refresh or remove from state
-  } catch (error) {
-    console.log("DELETE ERROR:", error);
-  }
-};
-
-
-  
-  // Navigation helper
-
-  const handleNavigation = (path) => navigate(`/${path}`);
-
-  
-  // Render
-  
   return (
     <div className="min-h-screen bg-gray-100 pt-16 px-4 flex flex-col items-center">
       {/* Profile */}
@@ -146,7 +102,8 @@ export default function Channel() {
           {userData && (
             <>
               <img
-                onClick={() => handleNavigation(`channel/stats/${userId}`)}
+                onClick={() => navigate(`/channel/${userData._id}/stats`)}
+
                 src={userData.avatar}
                 alt="avatar"
                 className="w-24 h-24 rounded-full cursor-pointer border-4 border-white object-cover"
@@ -161,9 +118,7 @@ export default function Channel() {
 
               <div className="ml-auto">
                 <Button
-                  className={`${
-                    isSubscribed ? "bg-gray-400" : "bg-red-700"
-                  }  hover:bg-none hover:shadow-none pointer-events-auto`}
+                  className={`${isSubscribed ? "bg-gray-400" : "bg-red-700"}`}
                   onClick={toggleSubscribe}
                 >
                   {isSubscribed ? "Subscribed" : "Subscribe"}
@@ -177,55 +132,41 @@ export default function Channel() {
       {/* Videos */}
       <div className="w-full max-w-5xl mt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         {videos.length > 0 ? (
-  videos.map((video, index) => (
-    <Card
-      key={video._id || index} 
-     
-      className="rounded-xl shadow hover:shadow-lg cursor-pointer transition"
-    >
-      <CardContent className="p-0">
-        
-        <img
-          src={video.thumbnail}
-          alt={video.title}
-          className="w-full h-40 object-cover rounded-t-xl"
-           onClick={() => navigate(`/watch/${video._id}`, { state: video })}
-        />
-
-        <div className="p-3">
-          <h2 className="font-semibold text-lg">{video.title}</h2>
-          <p className="text-sm text-gray-500">{video.description}</p>
-         <div className="flex justify-end relative">
-  <EllipsisVertical
-    className="cursor-pointer"
-     onClick={() =>
-    setShowDelete(showDelete === video._id ? null : video._id)
-  }
-  />
-
- {showDelete === video._id && (
-  <div className="absolute right-0 top-6 bg-white shadow-lg rounded-lg p-2 w-28">
-    <button
-      onClick={() => handleDelete(video._id)}
-      className="text-red-600 hover:bg-red-100 w-full text-left px-2 py-1 rounded-md"
-    >
-      Delete
-    </button>
-  </div>
-)}
-  
-</div>
-
-        </div>
-      </CardContent>
-    </Card>
-  ))
-) : (
-  <p className="text-gray-600 text-center col-span-3">
-    No videos uploaded yet.
-  </p>
-)}
-
+          videos.map(video => (
+            <Card key={video._id} className="rounded-xl shadow hover:shadow-lg cursor-pointer">
+              <CardContent className="p-0">
+                <img
+                  src={video.thumbnail}
+                  alt={video.title}
+                  className="w-full h-40 object-cover rounded-t-xl"
+                  onClick={() => navigate(`/watch/${video._id}`, { state: video })}
+                />
+                <div className="p-3">
+                  <h2 className="font-semibold text-lg">{video.title}</h2>
+                  <p className="text-sm text-gray-500">{video.description}</p>
+                  <div className="flex justify-end relative">
+                    <EllipsisVertical
+                      className="cursor-pointer"
+                      onClick={() => setShowDelete(showDelete === video._id ? null : video._id)}
+                    />
+                    {showDelete === video._id && (
+                      <div className="absolute right-0 top-6 bg-white shadow-lg rounded-lg p-2 w-28">
+                        <button
+                          onClick={() => handleDelete(video._id)}
+                          className="text-red-600 hover:bg-red-100 w-full text-left px-2 py-1 rounded-md"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        ) : (
+          <p className="text-gray-600 text-center col-span-3">No videos uploaded yet.</p>
+        )}
       </div>
     </div>
   );

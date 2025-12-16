@@ -73,6 +73,9 @@ const fetchProfile = async()=>{
  const updateProfile= ()=>{
     navigate(`/c/${userId}/update`)
   }
+  const changePassword = ()=>{
+    navigate(`/c/${userId}/password`)
+  }
  return (
   <div className="max-w-xl mx-auto mt-10 bg-white shadow-lg rounded-2xl overflow-hidden">
     {/* Cover Image */}
@@ -123,6 +126,11 @@ const fetchProfile = async()=>{
         onClick={updateProfile}
         className="mt-6 px-6 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition">
         Edit Profile
+      </button>
+        <button
+        onClick={changePassword}
+        className="mt-6 px-6 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition">
+       Change Password
       </button>
       
       <button 

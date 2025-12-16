@@ -5,55 +5,84 @@ import {ApiResponse} from "../utils/ApiResponse.js"
 import {asyncHandler} from "../utils/asyncHandler.js"
 
 const getVideoComments = asyncHandler(async (req, res) => {
-    const { videoId } = req.params;
-    let { page = 1, limit = 10 } = req.query;
+  const { videoId } = req.params;
+  let { page = 1, limit = 10 } = req.query;
 
-    page = parseInt(page);
-    limit = parseInt(limit);
-    const skip = (page - 1) * limit;
+  page = parseInt(page);
+  limit = parseInt(limit);
+  const skip = (page - 1) * limit;
 
-    const pipeline = [
+  // 🔥 DEFINE IT HERE
+  const loggedInUserId = req.user
+    ? new mongoose.Types.ObjectId(req.user._id)
+    : null;
+
+  const result = await Comments.aggregate([
+  {
+    $match: {
+      video: new mongoose.Types.ObjectId(videoId)
+    }
+  },
+  { $sort: { createdAt: -1 } },
+  {
+    $facet: {
+      metadata: [
+        { $count: "totalComments" },
+        { $addFields: { page, limit } }
+      ],
+      comments: [
+        { $skip: skip },
+        { $limit: limit },
         {
-            $match: {
-                video: new mongoose.Types.ObjectId(videoId)
-            }
+          $project: {
+            _id: 1,
+            content: 1,
+            createdAt: 1,
+            owner: 1
+          }
         },
         {
-            $sort: { createdAt: -1 }
-        },
-        {
-            $facet: {
-                metadata: [
-                    { $count: "totalComments" },
-                    { $addFields: { page, limit } }
-                ],
-                comments: [
-                    // { $skip: skip },
-                    // { $limit: limit },
-                    // {
-                    //     $lookup: {
-                    //         from: "users",
-                    //         localField: "owner",
-                    //         foreignField: "_id",
-                    //         as: "user"
-                    //     }
-                    // },
-                    // {
-                    //     $unwind: {
-                    //         path: "$user",
-                    //         preserveNullAndEmptyArrays: true   // 🔥 THIS IS THE FIX
-                    //     }
-                    // }
-                ]
-            }
-        }
-    ];
+  $lookup: {
+    from: "users",
+    localField: "owner",
+    foreignField: "_id",
+    as: "user"
+  }
+},
+{
+  $unwind: "$user"
+},
+{
+  $project: {
+    _id: 1,
+    content: 1,
+    createdAt: 1,
+    owner: 1,
 
-    const result = await Comments.aggregate(pipeline);
+    user: {
+      _id: "$user._id",
+      username: "$user.username",
+      avatar: "$user.avatar"
+    },
 
-    return res
-        .status(200)
-        .json(new ApiResponse(200, result, "Comments fetched successfully"));
+    isOwner: {
+      $cond: {
+        if: { $eq: ["$owner", loggedInUserId] },
+        then: true,
+        else: false
+      }
+    }
+  }
+}
+
+      ]
+    }
+  }
+]);
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, result, "Comments fetched successfully"));
 });
 
 
@@ -77,7 +106,7 @@ const addComment = asyncHandler(async (req, res) => {
         {
    content :content.trim(),
    video:videoId,
-   user:userId
+   owner:userId
 
         }
     )
@@ -121,7 +150,7 @@ const updateComment = asyncHandler(async (req, res) => {
     
     return res
     .status(200)
-    .json(new ApiResponse(200,comment[0],"comment are updated successfully"))
+    .json(new ApiResponse(200,comment,"comment are updated successfully"))
 })
 
 const deleteComment = asyncHandler(async (req, res) => {
