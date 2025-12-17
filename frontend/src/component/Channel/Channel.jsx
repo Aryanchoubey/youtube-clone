@@ -6,6 +6,7 @@ import axios from "axios";
 import { EllipsisVertical } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { string } from "zod";
 
 export default function Channel() {
   const navigate = useNavigate();
@@ -56,6 +57,8 @@ export default function Channel() {
           }
         );
         setVideos(res.data.data.videos || []);
+        console.log(res.data.data.videos[0].owner._id);
+        
       } catch (err) {
         console.error("Error loading user videos:", err);
       }
@@ -77,7 +80,7 @@ export default function Channel() {
       console.error("Subscription error:", err);
     }
   };
-
+const loggedInUser = localStorage.getItem("userId")
   const handleDelete = async (videoId) => {
     if (!token) return;
     try {
@@ -91,12 +94,17 @@ export default function Channel() {
     }
   };
 console.log(userData);
+if (!userData) {
+    return <div className="text-center mt-10">Loading channel...</div>;
+  }
 
   return (
     <div className="min-h-screen bg-gray-100 pt-16 px-4 flex flex-col items-center">
       {/* Profile */}
       <div className="w-full max-w-5xl bg-white rounded-2xl shadow-md overflow-hidden">
-        <div className="h-48 bg-gray-300"></div>
+        <div className="h-48 w-full bg-gray-300">
+         <img src={userData?.coverImage || "/default-cover.jpg"} className="h-48 w-full" alt="" />
+        </div>
 
         <CardContent className="lg:p-5 p-2 flex lg:flex-row flex-col items-center justify-between h-44 gap-4">
           {userData && (
@@ -151,10 +159,12 @@ console.log(userData);
                   <h2 className="font-semibold text-lg">{video.title}</h2>
                   <p className="text-sm text-gray-500">{video.description}</p>
                   <div className="flex justify-end relative">
-                    <EllipsisVertical
+                    {video.owner._id === loggedInUser  && (
+                      <EllipsisVertical
                       className="cursor-pointer"
                       onClick={() => setShowDelete(showDelete === video._id ? null : video._id)}
                     />
+                    )}
                     {showDelete === video._id && (
                       <div className="absolute right-0 top-6 bg-white shadow-lg rounded-lg p-2 w-28">
                         <button

@@ -57,6 +57,19 @@ export default function WatchVideos() {
     }
   }, [id, video]);
 
+
+   useEffect( ()=>{
+  
+  const res = axios.put(`${import.meta.env.VITE_BACKEND_URL}/api/v1/users/watch-history/${id}`,
+    {},
+    {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      }
+  )
+  },[id])
+
   /* ---------------- VIEWS ---------------- */
   const totalViews = async () => {
     if (!token || !id) return;

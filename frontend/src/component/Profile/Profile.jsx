@@ -80,7 +80,7 @@ const fetchProfile = async()=>{
   <div className="max-w-xl mx-auto mt-10 bg-white shadow-lg rounded-2xl overflow-hidden">
     {/* Cover Image */}
     {profile.coverImage && (
-      <div className="w-full h-32 bg-gray-200">
+      <div className="w-full h-48 bg-gray-200">
         <img
           src={profile.coverImage}
           alt="cover"
@@ -90,7 +90,7 @@ const fetchProfile = async()=>{
     )}
 
     {/* Profile Info */}
-    <div className="flex flex-col items-center mt-12 p-6">
+    <div className="flex flex-col items-center mt-1 p-6">
       {/* Avatar */}
       {profile.avatar ? (
         <img

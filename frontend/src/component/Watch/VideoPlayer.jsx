@@ -2,13 +2,16 @@
 
 import { useEffect, useRef, useState } from "react";
 import Hls from "hls.js";
+import axios from "axios";
+import { useParams } from "react-router-dom";
 
 export default function VideoPlayer({ src }) {
   const videoRef = useRef(null);
   const hlsRef = useRef(null);
   const [levels, setLevels] = useState([]);
   const [currentLevel, setCurrentLevel] = useState(-1); // -1 = auto
-
+ const token = localStorage.getItem("token")
+ const videoId = useParams()
   useEffect(() => {
     if (!src || !videoRef.current) return;
 
@@ -66,6 +69,7 @@ export default function VideoPlayer({ src }) {
     console.log("HLS levels:", levelIndex);
 
   };
+ 
 
   return (
     <div className="relative w-full">

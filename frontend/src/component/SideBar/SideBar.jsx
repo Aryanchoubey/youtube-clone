@@ -88,14 +88,22 @@ export default function Sidebar({ isSidebarOpen, setIsSidebarOpen }) {
             <div className="space-y-3">
               <Button
                 variant="ghost"
-                className="w-full justify-start"
+                className={`w-full justify-start ${
+                  pathname.includes("home")
+                    ? "bg-primary text-white"
+                    : "hover:bg-primary hover:text-white"
+                }`}
                 onClick={() => handleNavigation("")}
               >
                Home
               </Button>
               <Button
                 variant="ghost"
-                className="w-full justify-start"
+                className={`w-full justify-start ${
+                  pathname.includes("channel")
+                    ? "bg-primary text-white"
+                    : "hover:bg-primary hover:text-white"
+                }`}
                 onClick={() => handleNavigation(`channel/${_id}`)}
               >
                 Channel
@@ -120,7 +128,7 @@ export default function Sidebar({ isSidebarOpen, setIsSidebarOpen }) {
                 onClick={() => handleNavigation(`liked/${_id}`)}
                 variant="ghost"
                 className={`w-full justify-start ${
-                  pathname.includes("history")
+                  pathname.includes("liked")
                     ? "bg-primary text-white"
                     : "hover:bg-primary hover:text-white"
                 }`}
@@ -132,7 +140,7 @@ export default function Sidebar({ isSidebarOpen, setIsSidebarOpen }) {
                   onClick={() => handleNavigation("")}
                   variant="ghost"
                   className={`w-full justify-start ${
-                    pathname.includes("history")
+                    pathname.includes("collections")
                       ? "bg-primary text-white"
                       : "hover:bg-primary hover:text-white"
                   }`}

@@ -45,8 +45,8 @@ export default function ChannelStats() {
       {/* Banner */}
       <div className="w-full h-40 md:h-56 rounded-xl overflow-hidden shadow">
         <img
-          src={channel.banner || "/placeholder-banner.jpg"}
-          className="w-full h-full object-cover"
+            src={channel.coverImage} className="h-56 w-full" alt="" 
+         
         />
       </div>
 

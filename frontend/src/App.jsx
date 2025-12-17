@@ -12,6 +12,7 @@ import UpdateProfile from "./component/Profile/UpdateProfile";
 import ChannelStats from "./component/Channel/ChannelStats";
 import ChangePassword from "./component/Profile/ChangePassword";
 import Search from "./component/Search/Search";
+import WatchHistory from "./component/WatchHistory/WatchHistory";
 // import Home from "./component/Home";
 // import Layout from "./Layout/Layout";
 
@@ -33,6 +34,7 @@ function App() {
   <Route path="/channel/:id/stats" element={<ChannelStats/>} />
   <Route path="/watch/:id" element={<WatchVideos/>} />
   <Route path="/search" element={<Search/>} />
+  <Route path="/history" element={<WatchHistory/>} />
   
 
 

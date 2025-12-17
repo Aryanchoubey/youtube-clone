@@ -39,6 +39,7 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(409, "User already exists");
   }
 
+
   // Safely handle multer uploaded files
   const avatarLocalPath = req.files?.avatar[0]?.path; 
   const coverImagePath = req.files?.coverImage?.[0]?.path || null;
@@ -49,14 +50,14 @@ const registerUser = asyncHandler(async (req, res) => {
 
   if (avatarLocalPath) {
     const upload = await uploadOnCloudinaryImage(avatarLocalPath);
-    avatar = upload?.url || "";
+    avatar = upload?.secure_url || "";
   }
   
   
 
   if (coverImagePath) {
     const upload = await uploadOnCloudinaryImage(coverImagePath);
-    coverImage = upload?.url || "";
+    coverImage = upload?.secure_url || "";
   }
 
   // Create user
@@ -406,6 +407,37 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, channel[0], "user channel fetched successfully"));
 });
+const addToWatchHistory = asyncHandler(async (req, res) => {
+  const { videoId } = req.params;
+
+  if (!videoId) {
+    throw new ApiError(400, "Video ID is required");
+  }
+
+  await User.findByIdAndUpdate(
+    req.user._id,
+    {
+      $pull: { watchHistory: videoId },  
+    },
+    { new: true }
+  );
+
+  await User.findByIdAndUpdate(
+    req.user._id,
+    {
+      $push: {
+        watchHistory: {
+          $each: [videoId],
+          $position: 0, 
+        },
+      },
+    }
+  );
+
+  return res.status(200).json(
+    new ApiResponse(200, null, "Added to watch history")
+  );
+});
 
 
 const getWatchHistory = asyncHandler(async (req, res) => {
@@ -471,5 +503,6 @@ export {
   updateUserAvatar,
   updateUserCoverImage,
   getUserChannelProfile,
+  addToWatchHistory,
   getWatchHistory,
 };

@@ -39,12 +39,13 @@ const uploadOnCloudinaryImage = async (localFilePath)=>{
     if(!localFilePath) return null;
 
     const result = await cloudinary.uploader.upload(localFilePath,{
-      resourse_type:"auto",
+       resource_type: "image",
+      folder: "users"
       
 
     })
     fs.unlinkSync(localFilePath);
-    return result.secure_url
+    return result
   } catch (error) {
      console.log("Cloudinary upload thumbail  error:", error);
     return null;

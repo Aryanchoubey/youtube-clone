@@ -207,7 +207,7 @@ const getAllUsersVideos = asyncHandler(async (req,res)=>{
     // console.log( user);
     
   try {
-    const videos= await Video.find().sort({createdAt:-1}).populate("owner","username avatar")
+    const videos= await Video.find().sort({createdAt:-1}).populate("owner","username avatar coverImage")
     if (!videos) {
         throw new ApiError(400, "videos is not found")
     }
