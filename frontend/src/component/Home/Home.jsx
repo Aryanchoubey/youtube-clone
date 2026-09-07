@@ -8,7 +8,7 @@ function Home({ isSidebarOpen }) {
   const navigate = useNavigate();
   const getAllVideos = async () => {
     const token = localStorage.getItem("token");
-    if (!token) navigate("/login");
+    // if (!token) navigate("/login");
 
     try {
       const res = await axios.get(

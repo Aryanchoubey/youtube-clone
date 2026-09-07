@@ -229,8 +229,11 @@ export default function WatchVideos() {
           >
             <img
               src={video.owner.avatar}
+               alt={video.owner.username}
+            
               className="w-10 h-10 rounded-full object-cover"
             />
+            <span>{video.owner.username}</span>
           </div>
 
           {/* Like */}

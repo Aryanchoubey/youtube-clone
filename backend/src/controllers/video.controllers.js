@@ -73,33 +73,54 @@ const publishAVideo = asyncHandler(async (req, res) => {
 
   const videoPath = req.files?.videoFile?.[0]?.path;
   const thumbnailPath = req.files?.thumbnail?.[0]?.path;
-  console.log( videoPath);
-  
+
+  console.log("Video path:", videoPath);
+  console.log("Thumbnail path:", thumbnailPath);
 
   if (!videoPath) {
     throw new ApiError(400, "Video file is required");
   }
 
+  if (!thumbnailPath) {
+    throw new ApiError(400, "Thumbnail is required");
+  }
+
   const videoUrl = await uploadOnCloudinaryVideo(videoPath, "videos");
-  const thumbnailUrl = await uploadOnCloudinaryImage(thumbnailPath, "thumbnails");
- console.log( "video url :",videoUrl.public_id);
- 
+  const thumbnailUrl = await uploadOnCloudinaryImage(
+    thumbnailPath,
+    "thumbnails"
+  );
+
+  if (!videoUrl) {
+    throw new ApiError(400, "Video upload failed");
+  }
+
+  if (!thumbnailUrl) {
+    throw new ApiError(400, "Thumbnail upload failed");
+  }
+
+  console.log("Video public ID:", videoUrl.public_id);
+  console.log("Video URL:", videoUrl.secure_url);
+
+  console.log("Thumbnail URL:", thumbnailUrl.secure_url);
+
   const video = await Video.create({
     title,
     description,
     owner: user,
     ownerName: req.user.username,
 
-    videoFile: videoUrl.public_id,      // <-- This is now ONLY a string
-    thumbnail: thumbnailUrl,  // <-- Also only URL
+    // Store URL if your schema expects String
+    videoFile: videoUrl.secure_url,
+
+    // IMPORTANT: only store the URL, not the entire object
+    thumbnail: thumbnailUrl.secure_url,
   });
-  
-  
+
   return res.status(200).json(
     new ApiResponse(200, video, "Video uploaded successfully")
   );
 });
-
 
 const getVideoById = asyncHandler(async (req, res) => {
     const { videoId } = req.params
@@ -116,7 +137,7 @@ const getVideoById = asyncHandler(async (req, res) => {
     return res
     .status(200)
     .json(new ApiResponse(200,id,"successffully"))
-    //TODO: get video by id
+    
 })
 
 const updateVideo = asyncHandler(async (req, res) => {

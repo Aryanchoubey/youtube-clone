@@ -48,7 +48,7 @@ export default function VideoUpload() {
 
   const handleUpload = async () => {
  
-    if (!form.title || !videoFile || !thumbnail) {
+    if (!form.title || !videoFile ) {
       return setMessage("All fields are required!");
     }
 
@@ -82,6 +82,7 @@ export default function VideoUpload() {
       );
 
       setMessage("Video uploaded successfully!");
+      navigate(`/channel/${userData?._id}/stats`);
       console.log(res.data);
     } catch (error) {
       console.log(error);

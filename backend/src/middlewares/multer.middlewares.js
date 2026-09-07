@@ -2,9 +2,15 @@ import multer from "multer";
 import fs from "fs";
 import path from "path";
 
-const uploadDir = "./public/temp";
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
+const uploadDir = path.join(process.cwd(), "public/temp");
+
+// Ensure directory exists
+try {
+  if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+  }
+} catch (err) {
+  console.error("Error creating upload directory:", err);
 }
 
 const storage = multer.diskStorage({

@@ -1,1 +1,1 @@
-export const DB_NAME="data"
+export const DB_NAME="test"
