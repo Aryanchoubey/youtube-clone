@@ -15,7 +15,12 @@ app.use(express.static("public"));          // Serves all files in public at roo
 app.use("/temp", express.static("public/temp")); // Serves temp folder at /temp
 app.use(cookieParser());
 
-
+app.get("/", (req, res) => {
+    res.status(200).json({
+        success: true,
+        message: "YouTube Clone Backend is running 🚀"
+    });
+});
 //routes import
 import userRouter from './routes/user.routes.js'
 import healthcheckRouter from "./routes/healthcheck.routes.js"
