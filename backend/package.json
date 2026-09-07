@@ -13,10 +13,8 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    
-  "dev": "nodemon -r dotenv/config --experimental-json-modules src/index.js",
-  "start": "node -r dotenv/config --experimental-json-modules src/index.js"
-
+    "dev": "nodemon -r dotenv/config --experimental-json-modules src/index.js",
+    "start": "node -r dotenv/config --experimental-json-modules src/index.js"
   },
   "devDependencies": {
     "nodemon": "^3.1.11"
@@ -29,6 +27,7 @@
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "express-jwt": "^8.5.1",
+    "google-auth-library": "^11.0.2",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.20.1",
     "mongoose-aggregate-paginate-v2": "^1.1.4",
